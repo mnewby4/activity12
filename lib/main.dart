@@ -54,6 +54,7 @@ class Product {
 
 class _HomePageState extends State<HomePage> {
   // text fields' controllers
+  final TextEditingController _idController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
@@ -65,6 +66,7 @@ class _HomePageState extends State<HomePage> {
     String action = 'create';
     if (documentSnapshot != null) {
       action = 'update';
+      _idController.text = documentSnapshot['id'];
       _nameController.text = documentSnapshot['name'];
       _quantityController.text = documentSnapshot['quantity'].toString();
       _priceController.text = documentSnapshot['price'].toString();
@@ -85,6 +87,10 @@ class _HomePageState extends State<HomePage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              TextField(
+                controller: _idController,
+                decoration: const InputDecoration(labelText: 'id'),
+              ),
               TextField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Name'),
@@ -109,24 +115,27 @@ class _HomePageState extends State<HomePage> {
               ElevatedButton(
                 child: Text(action == 'create' ? 'Create' : 'Update'),
                 onPressed: () async {
+                  String id = _idController.text;
                   String name = _nameController.text;
                   int quantity = int.parse(_quantityController.text);
                   double price = double.parse(_priceController.text);
                   if (name.isNotEmpty && price != null) {
                     if (action == 'create') {
                       // Persist a new product to Firestore
-                      await _products.add({"id": 'test', "name": name, "quantity": quantity, "price": price});
+                      await _products.add({"id": id, "name": name, "quantity": quantity, "price": price});
                     }
 
                     if (action == 'update') {
                       // Update the product
                       await _products.doc(documentSnapshot!.id).update({
+                        "id": id,
                         "name": name,
                         "quantity": quantity,
                         "price": price,
                       });
                     }
 
+                    _idController.text = '';
                     _nameController.text = '';
                     _priceController.text = '';
                     _quantityController.text = '';
@@ -175,8 +184,9 @@ class _HomePageState extends State<HomePage> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(documentSnapshot['id']),
+                        Text(documentSnapshot['quantity'].toString()),
                         Text(documentSnapshot['price'].toString()),
-                        Text(documentSnapshot['quantity'].toString())
                       ],
                     ),
                     trailing: SizedBox(
