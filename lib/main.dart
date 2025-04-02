@@ -3,18 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
-/*
-  
-  flutter pub add 
-
-  screen widgets (3) - login (optional??), inventory list [display], update [add, edit]
-  in data model for inventory - str id, str name, int quantity, double price, datetime?
-
-  once connect to firebase [run myapp, async] u have crud ops 
-    
-  
- */
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -135,6 +123,10 @@ class _HomePageState extends State<HomePage> {
                       });
                     }
 
+                    if (action == 'delete') {
+                      _deleteProduct(documentSnapshot!.id);
+                    }
+
                     _idController.text = '';
                     _nameController.text = '';
                     _priceController.text = '';
@@ -153,6 +145,8 @@ class _HomePageState extends State<HomePage> {
 
   // Deleting a product by id
   Future<void> _deleteProduct(String productId) async {
+
+    FirebaseFirestore.instance.collection('inventory').doc(productId).delete();
    
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
